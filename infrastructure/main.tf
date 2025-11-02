@@ -1,4 +1,4 @@
-# Corrected Terraform configuration with security best practices
+# Corrected Terraform configuration with security best practices test
 resource "aws_s3_bucket" "example" {
   bucket = "my-test-bucket"
 }
