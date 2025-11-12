@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-AWS CDK Infrastructure Code - S3 Bucket WITHOUT Encryption
-WARNING: This creates an insecure S3 bucket without encryption enabled.
-This is for demonstration/testing purposes only and should NOT be used in production.
+AWS CDK Infrastructure Code - S3 Bucket WITH Encryption
+This creates an S3 bucket with server-side encryption enabled using AWS-managed keys (SSE-S3).
 """
 
 from aws_cdk import (
@@ -15,29 +14,24 @@ from aws_cdk import (
 from constructs import Construct
 
 
-class S3BucketNoEncryptionStack(Stack):
+class S3BucketEncryptedStack(Stack):
     """
-    CDK Stack that creates an S3 bucket without encryption enabled.
-    
-    WARNING: This is intentionally insecure and violates AWS security best practices.
-    Use only for testing or demonstration purposes.
+    CDK Stack that creates an S3 bucket with server-side encryption enabled.
     """
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # Create S3 bucket WITHOUT encryption
-        # This explicitly disables encryption which is NOT recommended
+        # Create S3 bucket WITH encryption
         bucket = s3.Bucket(
             self,
-            "NoEncryptionBucket",
+            "EncryptedBucket",
             bucket_name=None,  # Auto-generate bucket name
-            encryption=s3.BucketEncryption.UNENCRYPTED,  # Explicitly disable encryption
-            versioned=False,  # No versioning
-            public_read_access=False,  # Keep it private at least
+            encryption=s3.BucketEncryption.S3_MANAGED,  # Enable server-side encryption with AWS-managed keys
+            versioned=True,  # Enable versioning
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,  # Block public access
-            removal_policy=RemovalPolicy.DESTROY,  # Allow deletion
-            auto_delete_objects=True,  # Delete objects when stack is deleted
+            removal_policy=RemovalPolicy.RETAIN,  # Retain bucket on stack deletion
+            auto_delete_objects=False,  # Do not delete objects when stack is deleted
         )
 
         # Output the bucket name
@@ -45,8 +39,8 @@ class S3BucketNoEncryptionStack(Stack):
             self,
             "BucketName",
             value=bucket.bucket_name,
-            description="Name of the S3 bucket without encryption",
-            export_name="NoEncryptionBucketName",
+            description="Name of the encrypted S3 bucket",
+            export_name="EncryptedBucketName",
         )
 
         # Output the bucket ARN
@@ -54,26 +48,18 @@ class S3BucketNoEncryptionStack(Stack):
             self,
             "BucketArn",
             value=bucket.bucket_arn,
-            description="ARN of the S3 bucket without encryption",
-            export_name="NoEncryptionBucketArn",
-        )
-
-        # Warning output
-        CfnOutput(
-            self,
-            "SecurityWarning",
-            value="WARNING: This bucket has NO encryption enabled!",
-            description="Security warning about unencrypted bucket",
+            description="ARN of the encrypted S3 bucket",
+            export_name="EncryptedBucketArn",
         )
 
 
 # CDK App
 app = App()
 
-S3BucketNoEncryptionStack(
+S3BucketEncryptedStack(
     app,
-    "S3BucketNoEncryptionStack",
-    description="Creates an S3 bucket without encryption (INSECURE - for testing only)",
+    "S3BucketEncryptedStack",
+    description="Creates an S3 bucket with server-side encryption enabled",
 )
 
 app.synth()
