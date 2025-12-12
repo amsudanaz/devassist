@@ -1,0 +1,1 @@
+# Could not retrieve file content for s3-cdk/cdk_s3_no_encryption.py
